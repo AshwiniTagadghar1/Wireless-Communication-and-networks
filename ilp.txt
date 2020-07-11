@@ -1,0 +1,66 @@
+/*********************************************
+ * OPL 12.9.0.0 Model
+ * Author: Ashwini
+ * Creation Date: 17-Sep-2019 at 4:35:30 PM
+ *********************************************/
+
+int     n       = ...;
+range   phy  = 1..n;
+
+// Edges -- sparse set
+tuple       edge        {int i; int j;}
+setof(edge) Edges       = {<i,j> | ordered i,j in phy};
+int         dist[Edges] = ...;
+//int         Q[Edges] = ...;
+int b[Edges]=...;
+
+//*************************************
+
+
+range   vir  = 1..n;
+
+// Edges -- sparse set
+tuple       vedge        {int l; int k;}
+setof(vedge) vEdges       = {<l,k> | ordered l,k in vir};
+int         vdist[vEdges] = ...;
+int M=...;
+range m=1..M;
+int fcpu[m]=...;
+int fpkt[m]=...;
+int c[phy]=...;
+//*************************************** s[i][q][<l,k>][mm]- d[i][q][<l,k>][mm]
+// p[Edges] = [<1,2>, <2,3>];
+dvar boolean y[phy][m];
+ int f[Edges][phy][vEdges][m];
+ // int s[phy][phy][vEdges][m];
+   int d[phy][phy][vEdges][m];
+ minimize sum(i in phy,mm in m)y[i][mm]+sum (<i,j> in Edges,q in phy,<l,k> in vEdges,mm in m) f[<i,j>][q][<l,k>][mm];
+  subject to{
+// constraint00:
+//forall(i in phy,mm in m)
+ //    y[i][mm]==0;
+  
+  
+    constrain01:
+   // forall(i in phy,q in phy,<l,k> in vEdges,mm in m)
+   //  sum(j in phy) f[<i,j>][q][<l,k>][mm]  ==0;
+  // forall)
+     //sum(<i,j> in Edges)f[<i,j>][q][<l,k>][mm] - sum(<j,i> in Edges )f[<j,i>][q][<l,k>][mm] ==0;
+    constraint02:
+    forall(<i,j> in Edges)
+      sum(q in phy,<l,k> in vEdges,mm in m)f[<i,j>][q][<l,k>][mm]<=b[<i,j>];
+    constraint03:
+    forall(i in phy)
+      (sum(mm in m)y[i][mm]*fcpu[mm]<=c[i])=>( y[i][1]==1);
+      constarint04:
+      forall(i in phy,mm in m)
+        sum(q in phy,<l,k> in vEdges)
+          d[i][mm][<l,k>][mm]<=y[i][mm]*fpkt[mm] ;
+        
+}
+//execute
+ //   {
+  //  writeln("nb rows   = ",cplex.getNrows());
+  //  writeln("monitors used = ",cplex.getNcols()-6);
+  //  }
+ 
